@@ -1,0 +1,68 @@
+clc;
+clear;
+
+fprintf('==========================================\n');
+fprintf('     CÁLCULO DEL CÍRCULO DE MOHR\n');
+fprintf('==========================================\n\n');
+
+% === Entrada de datos ===
+EX = input('Ingresa el valor de sigma_x (MPa): ');
+EY = input('Ingresa el valor de sigma_y (MPa): ');
+ET = input('Ingresa el valor de tau_xy (MPa): ');
+
+% === Paso 1: Cálculo del centro ===
+EP = (EX + EY) / 2;
+fprintf('\n--- Paso 1: Cálculo del centro del círculo (σ_prom) ---\n');
+fprintf('σ_prom = (%.2f + %.2f)/2 = %.2f MPa\n', EX, EY, EP);
+
+% === Paso 2: Radio del círculo ===
+fprintf('\n--- Paso 2: Cálculo del radio del círculo (R) ---\n');
+fprintf('R = sqrt(((%.2f - %.2f)/2)^2 + (%.2f)^2)\n', EX, EY, ET);
+EMAX = sqrt(((EX - EY)/2)^2 + ET^2);
+fprintf('R = %.2f MPa\n', EMAX);
+
+% === Paso 3: Esfuerzos principales ===
+S1 = EP + EMAX;
+S2 = EP - EMAX;
+fprintf('\n--- Paso 3: Esfuerzos principales ---\n');
+fprintf('σ_1 = %.2f + %.2f = %.2f MPa\n', EP, EMAX, S1);
+fprintf('σ_2 = %.2f - %.2f = %.2f MPa\n', EP, EMAX, S2);
+
+% === Paso 4: Esfuerzo cortante máximo ===
+fprintf('\n--- Paso 4: Esfuerzo cortante máximo ---\n');
+fprintf('τ_max = %.2f MPa\n', EMAX);
+
+% === Paso 5: Ángulo del plano principal ===
+tan_2theta = (2 * ET) / (EX - EY);
+theta_p = 0.5 * atan(tan_2theta) * (180/pi);
+fprintf('\n--- Paso 5: Ángulo del plano principal ---\n');
+fprintf('tan(2θ) = (2 * %.2f) / (%.2f - %.2f) = %.2f\n', ET, EX, EY, tan_2theta);
+fprintf('θ = 0.5 * atan(%.2f) = %.2f°\n', tan_2theta, theta_p);
+
+% ===== GRAFICAR CÍRCULO DE MOHR Y ESTADOS TRANSFORMADOS =====
+figure;
+theta = linspace(0, 2*pi, 360);
+x_circle = EP + EMAX * cos(theta);
+y_circle = EMAX * sin(theta);
+
+plot(x_circle, y_circle, 'b-', 'LineWidth', 2); hold on;
+axis equal;
+grid on;
+xlabel('Esfuerzo Normal \sigma (MPa)');
+ylabel('Esfuerzo Cortante \tau (MPa)');
+title('Círculo de Mohr con Transformaciones');
+
+% Centro
+plot(EP, 0, 'ko', 'MarkerFaceColor', 'k');
+text(EP + 0.5, 0.5, 'C');
+
+% Estado inicial
+plot([EX EY], [-ET ET], 'ro-', 'LineWidth', 1.5);
+text(EX, -ET, ' Punto X1', 'VerticalAlignment','bottom', 'HorizontalAlignment','right');
+text(EY, ET, ' Punto Y1', 'VerticalAlignment','top', 'HorizontalAlignment','right');
+
+% Esfuerzos principales
+plot(S1, 0, 'go', 'MarkerFaceColor', 'g');
+plot(S2, 0, 'go', 'MarkerFaceColor', 'g');
+text(S1 + 0.5, 0.5, '\sigma_1');
+text(S2 - 2, 0.5, '\sigma_2');
